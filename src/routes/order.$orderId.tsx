@@ -1,11 +1,13 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { CheckCircle2, Clock, MapPin, Receipt, Wallet } from "lucide-react";
+import { CheckCircle2, Clock, ListChecks, MapPin, Receipt, Wallet } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/states";
 import { formatBDT } from "@/lib/format";
 import { formatOrderDate } from "@/lib/orders";
-import { statusLabel } from "@/lib/order-status";
+import { OrderTimeline } from "@/components/order/OrderTimeline";
+import { isCancelled, statusLabel } from "@/lib/order-status";
+import { cn } from "@/lib/utils";
 import { useOrder } from "@/lib/use-order";
 
 export const Route = createFileRoute("/order/$orderId")({
@@ -74,14 +76,40 @@ function OrderSuccessPage() {
 
         <div className="mt-6 inline-flex flex-col items-center gap-1 rounded-2xl border border-border/70 bg-secondary/40 px-6 py-4">
           <span className="text-xs uppercase tracking-widest text-muted-foreground">Order ID</span>
-          <span className="font-display text-xl font-extrabold text-gradient-ember">
+          <span className="break-all font-display text-xl font-extrabold text-gradient-ember">
             {order.code}
           </span>
           <span className="text-xs text-muted-foreground">{formatOrderDate(order.createdAt)}</span>
-          <span className="mt-2 rounded-full border border-primary/40 bg-secondary px-3 py-1 text-xs font-semibold">
-            {statusLabel(order.status, order.fulfillment)}
+          <span className="mt-2 flex flex-wrap justify-center gap-2">
+            <span
+              className={cn(
+                "rounded-full border px-3 py-1 text-xs font-semibold",
+                isCancelled(order.status)
+                  ? "border-destructive/40 bg-destructive/10 text-destructive"
+                  : "border-primary/40 bg-secondary",
+              )}
+            >
+              {statusLabel(order.status, order.fulfillment)}
+            </span>
+            <span className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground">
+              {isDelivery ? "Delivery" : "Pickup"}
+            </span>
           </span>
         </div>
+      </section>
+
+      <section className="mt-6 rounded-2xl border border-border/70 bg-card p-4 shadow-card sm:p-6">
+        <h2 className="flex items-center gap-2 font-display text-lg font-extrabold">
+          <ListChecks className="h-4 w-4 text-primary" /> Order status
+        </h2>
+        <div className="mt-4">
+          <OrderTimeline status={order.status} fulfillment={order.fulfillment} compact />
+        </div>
+        <Button asChild variant="outline" size="sm" className="mt-4 w-full sm:w-auto">
+          <Link to="/track/$orderId" params={{ orderId: order.id }}>
+            Live tracking
+          </Link>
+        </Button>
       </section>
 
       <section className="mt-6 rounded-2xl border border-border/70 bg-card p-5 shadow-card sm:p-6">
