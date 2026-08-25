@@ -166,7 +166,7 @@ function OrderCard({
   return (
     <li className="rounded-2xl border border-border/70 bg-card p-4 shadow-card sm:p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <span className="font-display text-base font-extrabold text-gradient-ember">
+        <span className="break-all font-display text-base font-extrabold text-gradient-ember">
           {order.code}
         </span>
         <span
@@ -181,7 +181,12 @@ function OrderCard({
         </span>
       </div>
 
-      <p className="mt-1 text-xs text-muted-foreground">{formatOrderDate(order.createdAt)}</p>
+      <div className="mt-1 flex flex-wrap items-center gap-2">
+        <span className="text-xs text-muted-foreground">{formatOrderDate(order.createdAt)}</span>
+        <span className="rounded-full border border-border px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
+          {order.fulfillment === "delivery" ? "Delivery" : "Pickup"}
+        </span>
+      </div>
       <p className="mt-2 break-words text-sm text-muted-foreground">{summary}</p>
 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-border/70 pt-3">
