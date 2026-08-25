@@ -1,10 +1,12 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { ChefHat, CheckCircle2, CircleSlash, PackageCheck, ShoppingBag, Truck } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/states";
+import { OrderTimeline } from "@/components/order/OrderTimeline";
 import { cn } from "@/lib/utils";
 import { formatOrderDate } from "@/lib/orders";
-import { isCancelled, statusFlow, statusIndex, statusLabel, type OrderStatus } from "@/lib/order-status";
+import { isActiveOrder, isCancelled, statusLabel } from "@/lib/order-status";
 import { useOrder } from "@/lib/use-order";
 
 export const Route = createFileRoute("/track/$orderId")({
@@ -22,86 +24,88 @@ export const Route = createFileRoute("/track/$orderId")({
   component: TrackOrderPage,
 });
 
-const ICONS: Record<OrderStatus, typeof CheckCircle2> = {
-  placed: ShoppingBag,
-  confirmed: CheckCircle2,
-  preparing: ChefHat,
-  ready: PackageCheck,
-  out_for_delivery: Truck,
-  completed: CheckCircle2,
-  cancelled: CircleSlash,
-};
-
 function TrackOrderPage() {
   const { orderId } = Route.useParams();
-  const { order, ready } = useOrder(orderId);
-
-  const fulfillment = order?.fulfillment ?? "delivery";
-  const steps = statusFlow(fulfillment);
-  const currentIndex = order ? statusIndex(order.status, fulfillment) : -1;
-  const cancelled = order ? isCancelled(order.status) : false;
+  const { order, ready, error, refreshing, refresh } = useOrder(orderId);
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-10 pb-32 sm:px-6 sm:py-14">
+    <div className="mx-auto w-full max-w-2xl px-4 py-8 pb-32 sm:px-6 sm:py-14">
       <h1 className="font-display text-3xl font-black sm:text-4xl">Track Order</h1>
       <p className="mt-2 text-sm text-muted-foreground">
         {order
-          ? `Current status: ${statusLabel(order.status, fulfillment)}`
+          ? `Current status: ${statusLabel(order.status, order.fulfillment)}`
           : "Follow your order from the kitchen to your door."}
       </p>
 
-      <section className="mt-6 rounded-2xl border border-border/70 bg-card p-5 shadow-card sm:p-6">
-        {ready && order ? (
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <span className="font-display text-lg font-extrabold text-gradient-ember">
+      {!ready ? (
+        <div className="mt-6 h-72 animate-pulse rounded-2xl border border-border/70 bg-card" />
+      ) : error ? (
+        <div className="mt-6">
+          <EmptyState
+            title="We couldn't load this order"
+            description="Please check your connection and try again."
+            action={<Button onClick={refresh}>Try again</Button>}
+          />
+        </div>
+      ) : !order ? (
+        <div className="mt-6">
+          <EmptyState
+            title="Order not found"
+            description="This order doesn't exist or belongs to another account."
+            action={
+              <Button asChild>
+                <Link to="/account/orders">My Orders</Link>
+              </Button>
+            }
+          />
+        </div>
+      ) : (
+        <section className="mt-6 rounded-2xl border border-border/70 bg-card p-4 shadow-card sm:p-6">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+            <span className="break-all font-display text-lg font-extrabold text-gradient-ember">
               {order.code}
             </span>
             <span className="text-xs text-muted-foreground">
               {formatOrderDate(order.createdAt)}
             </span>
           </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            {ready ? "We couldn't find this order." : "Loading order…"}
-          </p>
-        )}
 
-        {cancelled ? (
-          <p className="mt-5 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-            This order was cancelled. Please contact us if you need help.
-          </p>
-        ) : (
-          <ol className="mt-6 space-y-5">
-            {steps.map((step, i) => {
-              const done = currentIndex >= i && currentIndex >= 0;
-              const isCurrent = currentIndex === i;
-              const Icon = ICONS[step];
-              return (
-                <li key={step} className="flex items-start gap-3">
-                  <span
-                    className={cn(
-                      "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border",
-                      done
-                        ? "border-primary bg-secondary text-primary"
-                        : "border-border text-muted-foreground",
-                    )}
-                  >
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  <div>
-                    <p className={cn("text-sm font-semibold", !done && "text-muted-foreground")}>
-                      {statusLabel(step, fulfillment)}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {isCurrent ? "In progress now" : done ? "Done" : "Pending"}
-                    </p>
-                  </div>
-                </li>
-              );
-            })}
-          </ol>
-        )}
-      </section>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <span
+              className={cn(
+                "rounded-full border px-3 py-1 text-xs font-semibold",
+                isCancelled(order.status)
+                  ? "border-destructive/40 bg-destructive/10 text-destructive"
+                  : "border-primary/40 bg-secondary",
+              )}
+            >
+              {statusLabel(order.status, order.fulfillment)}
+            </span>
+            <span className="rounded-full border border-border px-3 py-1 text-xs font-semibold capitalize text-muted-foreground">
+              {order.fulfillment === "delivery" ? "Delivery" : "Pickup"}
+            </span>
+            {order.estimatedTime ? (
+              <span className="text-xs text-muted-foreground">Est. {order.estimatedTime}</span>
+            ) : null}
+          </div>
+
+          <div className="mt-6">
+            <OrderTimeline status={order.status} fulfillment={order.fulfillment} />
+          </div>
+
+          {isActiveOrder(order.status) ? (
+            <div className="mt-6 flex items-center justify-between gap-3 border-t border-border/70 pt-4">
+              <p className="text-xs text-muted-foreground">
+                Status updates automatically every few seconds.
+              </p>
+              <Button size="sm" variant="ghost" onClick={refresh} disabled={refreshing}>
+                <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} aria-hidden="true" />
+                Refresh
+              </Button>
+            </div>
+          ) : null}
+        </section>
+      )}
 
       <div className="mt-8 flex flex-col gap-3 sm:flex-row">
         {order ? (
