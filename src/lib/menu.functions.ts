@@ -12,12 +12,35 @@ import type { Database } from "@/integrations/supabase/types";
  * applies the bundled placeholder image fallback.
  */
 
-export const getMenu = createServerFn({ method: "GET" }).handler(async () => {
-  const key = process.env["SUPABASE_PUBLISHABLE_KEY"];
-  const url = process.env["SUPABASE_URL"];
-  if (!key || !url) return { categories: [], products: [], variants: [], images: [] };
+type CategoryRow = Pick<
+  Database["public"]["Tables"]["categories"]["Row"],
+  "id" | "slug" | "name" | "description" | "image_url" | "is_visible" | "sort_order"
+>;
+type ProductRow = Pick<
+  Database["public"]["Tables"]["products"]["Row"],
+  | "id"
+  | "category_id"
+  | "slug"
+  | "name"
+  | "description"
+  | "base_price"
+  | "is_available"
+  | "is_featured"
+  | "is_popular"
+  | "badges"
+  | "sort_order"
+>;
+type VariantRow = Pick<
+  Database["public"]["Tables"]["product_variants"]["Row"],
+  "id" | "product_id" | "name" | "price" | "is_available" | "sort_order"
+>;
+type ImageRow = Pick<
+  Database["public"]["Tables"]["product_images"]["Row"],
+  "id" | "product_id" | "url" | "alt" | "is_primary" | "sort_order"
+>;
 
-  const supabase = createClient<Database>(url, key, {
+function createPublicClient(url: string, key: string) {
+  return createClient<Database>(url, key, {
     auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
     global: {
       fetch: (input, init) => {
@@ -31,6 +54,23 @@ export const getMenu = createServerFn({ method: "GET" }).handler(async () => {
       },
     },
   });
+}
+
+const EMPTY_BY_SLUG = {
+  product: null as ProductRow | null,
+  variants: [] as VariantRow[],
+  images: [] as ImageRow[],
+  category: null as CategoryRow | null,
+  related: [] as ProductRow[],
+  relatedImages: [] as ImageRow[],
+};
+
+export const getMenu = createServerFn({ method: "GET" }).handler(async () => {
+  const key = process.env["SUPABASE_PUBLISHABLE_KEY"];
+  const url = process.env["SUPABASE_URL"];
+  if (!key || !url) return { categories: [], products: [], variants: [], images: [] };
+
+  const supabase = createPublicClient(url, key);
 
   const { data: categories } = await supabase
     .from("categories")
@@ -39,7 +79,7 @@ export const getMenu = createServerFn({ method: "GET" }).handler(async () => {
     .order("sort_order");
 
   const categoryIds = (categories ?? []).map((c) => c.id);
-  let products: Database["public"]["Tables"]["products"]["Row"][] = [];
+  let products: ProductRow[] = [];
   if (categoryIds.length) {
     const { data } = await supabase
       .from("products")
@@ -48,31 +88,31 @@ export const getMenu = createServerFn({ method: "GET" }).handler(async () => {
       )
       .in("category_id", categoryIds)
       .order("sort_order");
-    products = data ?? [];
+    products = (data ?? []) as ProductRow[];
   }
 
   const productIds = products.map((p) => p.id);
-  let variants: Database["public"]["Tables"]["product_variants"]["Row"][] = [];
+  let variants: VariantRow[] = [];
   if (productIds.length) {
     const { data } = await supabase
       .from("product_variants")
       .select("id,product_id,name,price,is_available,sort_order")
       .in("product_id", productIds)
       .order("sort_order");
-    variants = data ?? [];
+    variants = (data ?? []) as VariantRow[];
   }
 
-  let images: Database["public"]["Tables"]["product_images"]["Row"][] = [];
+  let images: ImageRow[] = [];
   if (productIds.length) {
     const { data } = await supabase
       .from("product_images")
       .select("id,product_id,url,alt,is_primary,sort_order")
       .in("product_id", productIds)
       .order("sort_order");
-    images = data ?? [];
+    images = (data ?? []) as ImageRow[];
   }
 
-  return { categories: categories ?? [], products, variants, images };
+  return { categories: (categories ?? []) as CategoryRow[], products, variants, images };
 });
 
 export const getProductBySlug = createServerFn({ method: "GET" })
@@ -80,29 +120,9 @@ export const getProductBySlug = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const key = process.env["SUPABASE_PUBLISHABLE_KEY"];
     const url = process.env["SUPABASE_URL"];
-    const empty = {
-      product: null as Database["public"]["Tables"]["products"]["Row"] | null,
-      variants: [] as Database["public"]["Tables"]["product_variants"]["Row"][],
-      images: [] as Database["public"]["Tables"]["product_images"]["Row"][],
-      category: null as Database["public"]["Tables"]["categories"]["Row"] | null,
-      related: [] as Database["public"]["Tables"]["products"]["Row"][],
-      relatedImages: [] as Database["public"]["Tables"]["product_images"]["Row"][],
-    };
-    if (!key || !url) return empty;
+    if (!key || !url) return EMPTY_BY_SLUG;
 
-    const supabase = createClient<Database>(url, key, {
-      auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
-      global: {
-        fetch: (input, init) => {
-          const headers = new Headers(init?.headers);
-          if (key.startsWith("sb_") && headers.get("Authorization") === `Bearer ${key}`) {
-            headers.delete("Authorization");
-          }
-          headers.set("apikey", key);
-          return fetch(input, { ...init, headers });
-        },
-      },
-    });
+    const supabase = createPublicClient(url, key);
 
     const { data: product } = await supabase
       .from("products")
@@ -112,7 +132,7 @@ export const getProductBySlug = createServerFn({ method: "GET" })
       .eq("slug", data.slug)
       .maybeSingle();
 
-    if (!product) return empty;
+    if (!product) return EMPTY_BY_SLUG;
 
     const { data: category } = await supabase
       .from("categories")
@@ -121,7 +141,7 @@ export const getProductBySlug = createServerFn({ method: "GET" })
       .maybeSingle();
 
     // A product in a hidden category is treated as not found.
-    if (!category || !category.is_visible) return empty;
+    if (!category || !category.is_visible) return EMPTY_BY_SLUG;
 
     const { data: variants } = await supabase
       .from("product_variants")
@@ -146,22 +166,22 @@ export const getProductBySlug = createServerFn({ method: "GET" })
       .limit(4);
 
     const relatedIds = (related ?? []).map((r) => r.id);
-    let relatedImages: Database["public"]["Tables"]["product_images"]["Row"][] = [];
+    let relatedImages: ImageRow[] = [];
     if (relatedIds.length) {
       const { data: ri } = await supabase
         .from("product_images")
         .select("id,product_id,url,alt,is_primary,sort_order")
         .in("product_id", relatedIds)
         .order("sort_order");
-      relatedImages = ri ?? [];
+      relatedImages = (ri ?? []) as ImageRow[];
     }
 
     return {
-      product,
-      variants: variants ?? [],
-      images: images ?? [],
-      category,
-      related: related ?? [],
+      product: product as ProductRow,
+      variants: (variants ?? []) as VariantRow[],
+      images: (images ?? []) as ImageRow[],
+      category: category as CategoryRow,
+      related: (related ?? []) as ProductRow[],
       relatedImages,
     };
   });
