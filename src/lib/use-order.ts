@@ -61,7 +61,7 @@ export function useOrder(orderId: string) {
     // Keep the status fresh while the order is still being processed.
     refetchInterval: (query) => {
       const status = query.state.data?.status;
-      return status && status !== "completed" && status !== "cancelled" ? 30 * 1000 : false;
+      return status && status !== "completed" && status !== "cancelled" ? 20 * 1000 : false;
     },
   });
 
@@ -72,5 +72,7 @@ export function useOrder(orderId: string) {
     order: order ?? null,
     ready: !query.isPending,
     error: query.isError && !fallback ? query.error : null,
+    refreshing: query.isFetching,
+    refresh: () => void query.refetch(),
   };
 }
