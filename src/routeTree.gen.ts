@@ -16,6 +16,7 @@ import { Route as CartRouteImport } from './routes/cart'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as AuthenticatedOwnerRouteImport } from './routes/_authenticated/owner'
 import { Route as MenuIndexRouteImport } from './routes/menu.index'
 import { Route as MenuProductSlugRouteImport } from './routes/menu.$productSlug'
 import { Route as OrderOrderIdRouteImport } from './routes/order.$orderId'
@@ -59,6 +60,11 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   id: '/forgot-password',
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedOwnerRoute = AuthenticatedOwnerRouteImport.update({
+  id: '/owner',
+  path: '/owner',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const MenuIndexRoute = MenuIndexRouteImport.update({
   id: '/menu/',
@@ -118,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/owner': typeof AuthenticatedOwnerRoute
   '/menu/$productSlug': typeof MenuProductSlugRoute
   '/order/$orderId': typeof OrderOrderIdRoute
   '/track/$orderId': typeof TrackOrderIdRoute
@@ -135,6 +142,7 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/owner': typeof AuthenticatedOwnerRoute
   '/menu/$productSlug': typeof MenuProductSlugRoute
   '/order/$orderId': typeof OrderOrderIdRoute
   '/track/$orderId': typeof TrackOrderIdRoute
@@ -154,6 +162,7 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/_authenticated/owner': typeof AuthenticatedOwnerRoute
   '/menu/$productSlug': typeof MenuProductSlugRoute
   '/order/$orderId': typeof OrderOrderIdRoute
   '/track/$orderId': typeof TrackOrderIdRoute
@@ -173,6 +182,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/forgot-password'
+    | '/owner'
     | '/menu/$productSlug'
     | '/order/$orderId'
     | '/track/$orderId'
@@ -190,6 +200,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/forgot-password'
+    | '/owner'
     | '/menu/$productSlug'
     | '/order/$orderId'
     | '/track/$orderId'
@@ -208,6 +219,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/forgot-password'
+    | '/_authenticated/owner'
     | '/menu/$productSlug'
     | '/order/$orderId'
     | '/track/$orderId'
@@ -284,6 +296,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/owner': {
+      id: '/_authenticated/owner'
+      path: '/owner'
+      fullPath: '/owner'
+      preLoaderRoute: typeof AuthenticatedOwnerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/menu/': {
       id: '/menu/'
       path: '/menu'
@@ -351,6 +370,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedOwnerRoute: typeof AuthenticatedOwnerRoute
   AuthenticatedAccountAddressesRoute: typeof AuthenticatedAccountAddressesRoute
   AuthenticatedAccountFavoritesRoute: typeof AuthenticatedAccountFavoritesRoute
   AuthenticatedAccountNotificationsRoute: typeof AuthenticatedAccountNotificationsRoute
@@ -359,6 +379,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedOwnerRoute: AuthenticatedOwnerRoute,
   AuthenticatedAccountAddressesRoute: AuthenticatedAccountAddressesRoute,
   AuthenticatedAccountFavoritesRoute: AuthenticatedAccountFavoritesRoute,
   AuthenticatedAccountNotificationsRoute:
