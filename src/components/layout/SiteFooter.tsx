@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { MapPin } from "lucide-react";
+import { MapPin, ShieldCheck } from "lucide-react";
 
 import { restaurant } from "@/data/restaurant";
 
@@ -57,6 +57,15 @@ export function SiteFooter() {
                 className="text-muted-foreground transition-smooth hover:text-foreground"
               >
                 Contact & location
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/owner"
+                className="inline-flex items-center gap-1.5 text-muted-foreground/70 transition-smooth hover:text-foreground"
+              >
+                <ShieldCheck aria-hidden="true" className="size-3.5" />
+                Owner Dashboard
               </Link>
             </li>
           </ul>
