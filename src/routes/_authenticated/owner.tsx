@@ -71,17 +71,28 @@ function OwnerLayout() {
   }
 
   if (!access.data?.isOwner) {
+    const canClaim = Boolean(access.data?.canClaim);
     return (
       <div className="mx-auto w-full max-w-5xl px-4 py-8">
-        <EmptyState
-          title="Owner access required"
-          description={
-            access.data?.canClaim
-              ? "No owner has been set up yet. Claim owner access for this account to manage Flamio."
-              : "This account doesn't have owner permissions. Ask the restaurant owner to grant access."
-          }
-          action={
-            access.data?.canClaim ? (
+        <div className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-12 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+            {canClaim ? (
+              <ShieldCheck className="h-6 w-6 text-primary" />
+            ) : (
+              <Lock className="h-6 w-6 text-muted-foreground" />
+            )}
+          </div>
+          <h3 className="mt-4 font-display text-lg font-bold">
+            {canClaim ? "Set up your owner access" : "Owner access required"}
+          </h3>
+          <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
+            {canClaim
+              ? "No owner has been set up for Flamio yet. Claim owner access with this account to manage orders, the menu and restaurant settings."
+              : "This account doesn't have owner permissions yet. Ask the restaurant owner to grant you access, then refresh this page."}
+          </p>
+
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+            {canClaim ? (
               <Button
                 disabled={claiming}
                 onClick={async () => {
@@ -103,15 +114,19 @@ function OwnerLayout() {
                 Claim owner access
               </Button>
             ) : (
-              <Button asChild variant="outline">
-                <Link to="/">Back to Flamio</Link>
+              <Button variant="outline" onClick={() => void access.refetch()}>
+                Check again
               </Button>
-            )
-          }
-        />
+            )}
+            <Button asChild variant="ghost">
+              <Link to="/">Back to Flamio</Link>
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
+
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
