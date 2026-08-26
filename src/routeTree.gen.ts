@@ -26,6 +26,10 @@ import { Route as AuthenticatedAccountAddressesRouteImport } from './routes/_aut
 import { Route as AuthenticatedAccountFavoritesRouteImport } from './routes/_authenticated/account.favorites'
 import { Route as AuthenticatedAccountNotificationsRouteImport } from './routes/_authenticated/account.notifications'
 import { Route as AuthenticatedAccountOrdersRouteImport } from './routes/_authenticated/account.orders'
+import { Route as AuthenticatedOwnerIndexRouteImport } from './routes/_authenticated/owner.index'
+import { Route as AuthenticatedOwnerMenuRouteImport } from './routes/_authenticated/owner.menu'
+import { Route as AuthenticatedOwnerOrdersRouteImport } from './routes/_authenticated/owner.orders'
+import { Route as AuthenticatedOwnerSettingsRouteImport } from './routes/_authenticated/owner.settings'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -116,6 +120,28 @@ const AuthenticatedAccountOrdersRoute =
     path: '/account/orders',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedOwnerIndexRoute = AuthenticatedOwnerIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedOwnerRoute,
+} as any)
+const AuthenticatedOwnerMenuRoute = AuthenticatedOwnerMenuRouteImport.update({
+  id: '/menu',
+  path: '/menu',
+  getParentRoute: () => AuthenticatedOwnerRoute,
+} as any)
+const AuthenticatedOwnerOrdersRoute =
+  AuthenticatedOwnerOrdersRouteImport.update({
+    id: '/orders',
+    path: '/orders',
+    getParentRoute: () => AuthenticatedOwnerRoute,
+  } as any)
+const AuthenticatedOwnerSettingsRoute =
+  AuthenticatedOwnerSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedOwnerRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -124,7 +150,7 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/forgot-password': typeof ForgotPasswordRoute
-  '/owner': typeof AuthenticatedOwnerRoute
+  '/owner': typeof AuthenticatedOwnerRouteWithChildren
   '/menu/$productSlug': typeof MenuProductSlugRoute
   '/order/$orderId': typeof OrderOrderIdRoute
   '/track/$orderId': typeof TrackOrderIdRoute
@@ -133,7 +159,11 @@ export interface FileRoutesByFullPath {
   '/account/favorites': typeof AuthenticatedAccountFavoritesRoute
   '/account/notifications': typeof AuthenticatedAccountNotificationsRoute
   '/account/orders': typeof AuthenticatedAccountOrdersRoute
+  '/owner/menu': typeof AuthenticatedOwnerMenuRoute
+  '/owner/orders': typeof AuthenticatedOwnerOrdersRoute
+  '/owner/settings': typeof AuthenticatedOwnerSettingsRoute
   '/account/': typeof AuthenticatedAccountIndexRoute
+  '/owner/': typeof AuthenticatedOwnerIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -142,7 +172,6 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/forgot-password': typeof ForgotPasswordRoute
-  '/owner': typeof AuthenticatedOwnerRoute
   '/menu/$productSlug': typeof MenuProductSlugRoute
   '/order/$orderId': typeof OrderOrderIdRoute
   '/track/$orderId': typeof TrackOrderIdRoute
@@ -151,7 +180,11 @@ export interface FileRoutesByTo {
   '/account/favorites': typeof AuthenticatedAccountFavoritesRoute
   '/account/notifications': typeof AuthenticatedAccountNotificationsRoute
   '/account/orders': typeof AuthenticatedAccountOrdersRoute
+  '/owner/menu': typeof AuthenticatedOwnerMenuRoute
+  '/owner/orders': typeof AuthenticatedOwnerOrdersRoute
+  '/owner/settings': typeof AuthenticatedOwnerSettingsRoute
   '/account': typeof AuthenticatedAccountIndexRoute
+  '/owner': typeof AuthenticatedOwnerIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -162,7 +195,7 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/forgot-password': typeof ForgotPasswordRoute
-  '/_authenticated/owner': typeof AuthenticatedOwnerRoute
+  '/_authenticated/owner': typeof AuthenticatedOwnerRouteWithChildren
   '/menu/$productSlug': typeof MenuProductSlugRoute
   '/order/$orderId': typeof OrderOrderIdRoute
   '/track/$orderId': typeof TrackOrderIdRoute
@@ -171,7 +204,11 @@ export interface FileRoutesById {
   '/_authenticated/account/favorites': typeof AuthenticatedAccountFavoritesRoute
   '/_authenticated/account/notifications': typeof AuthenticatedAccountNotificationsRoute
   '/_authenticated/account/orders': typeof AuthenticatedAccountOrdersRoute
+  '/_authenticated/owner/menu': typeof AuthenticatedOwnerMenuRoute
+  '/_authenticated/owner/orders': typeof AuthenticatedOwnerOrdersRoute
+  '/_authenticated/owner/settings': typeof AuthenticatedOwnerSettingsRoute
   '/_authenticated/account/': typeof AuthenticatedAccountIndexRoute
+  '/_authenticated/owner/': typeof AuthenticatedOwnerIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -191,7 +228,11 @@ export interface FileRouteTypes {
     | '/account/favorites'
     | '/account/notifications'
     | '/account/orders'
+    | '/owner/menu'
+    | '/owner/orders'
+    | '/owner/settings'
     | '/account/'
+    | '/owner/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -200,7 +241,6 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/forgot-password'
-    | '/owner'
     | '/menu/$productSlug'
     | '/order/$orderId'
     | '/track/$orderId'
@@ -209,7 +249,11 @@ export interface FileRouteTypes {
     | '/account/favorites'
     | '/account/notifications'
     | '/account/orders'
+    | '/owner/menu'
+    | '/owner/orders'
+    | '/owner/settings'
     | '/account'
+    | '/owner'
   id:
     | '__root__'
     | '/'
@@ -228,7 +272,11 @@ export interface FileRouteTypes {
     | '/_authenticated/account/favorites'
     | '/_authenticated/account/notifications'
     | '/_authenticated/account/orders'
+    | '/_authenticated/owner/menu'
+    | '/_authenticated/owner/orders'
+    | '/_authenticated/owner/settings'
     | '/_authenticated/account/'
+    | '/_authenticated/owner/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -366,11 +414,56 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAccountOrdersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/owner/': {
+      id: '/_authenticated/owner/'
+      path: '/'
+      fullPath: '/owner/'
+      preLoaderRoute: typeof AuthenticatedOwnerIndexRouteImport
+      parentRoute: typeof AuthenticatedOwnerRoute
+    }
+    '/_authenticated/owner/menu': {
+      id: '/_authenticated/owner/menu'
+      path: '/menu'
+      fullPath: '/owner/menu'
+      preLoaderRoute: typeof AuthenticatedOwnerMenuRouteImport
+      parentRoute: typeof AuthenticatedOwnerRoute
+    }
+    '/_authenticated/owner/orders': {
+      id: '/_authenticated/owner/orders'
+      path: '/orders'
+      fullPath: '/owner/orders'
+      preLoaderRoute: typeof AuthenticatedOwnerOrdersRouteImport
+      parentRoute: typeof AuthenticatedOwnerRoute
+    }
+    '/_authenticated/owner/settings': {
+      id: '/_authenticated/owner/settings'
+      path: '/settings'
+      fullPath: '/owner/settings'
+      preLoaderRoute: typeof AuthenticatedOwnerSettingsRouteImport
+      parentRoute: typeof AuthenticatedOwnerRoute
+    }
   }
 }
 
+interface AuthenticatedOwnerRouteChildren {
+  AuthenticatedOwnerMenuRoute: typeof AuthenticatedOwnerMenuRoute
+  AuthenticatedOwnerOrdersRoute: typeof AuthenticatedOwnerOrdersRoute
+  AuthenticatedOwnerSettingsRoute: typeof AuthenticatedOwnerSettingsRoute
+  AuthenticatedOwnerIndexRoute: typeof AuthenticatedOwnerIndexRoute
+}
+
+const AuthenticatedOwnerRouteChildren: AuthenticatedOwnerRouteChildren = {
+  AuthenticatedOwnerMenuRoute: AuthenticatedOwnerMenuRoute,
+  AuthenticatedOwnerOrdersRoute: AuthenticatedOwnerOrdersRoute,
+  AuthenticatedOwnerSettingsRoute: AuthenticatedOwnerSettingsRoute,
+  AuthenticatedOwnerIndexRoute: AuthenticatedOwnerIndexRoute,
+}
+
+const AuthenticatedOwnerRouteWithChildren =
+  AuthenticatedOwnerRoute._addFileChildren(AuthenticatedOwnerRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedOwnerRoute: typeof AuthenticatedOwnerRoute
+  AuthenticatedOwnerRoute: typeof AuthenticatedOwnerRouteWithChildren
   AuthenticatedAccountAddressesRoute: typeof AuthenticatedAccountAddressesRoute
   AuthenticatedAccountFavoritesRoute: typeof AuthenticatedAccountFavoritesRoute
   AuthenticatedAccountNotificationsRoute: typeof AuthenticatedAccountNotificationsRoute
@@ -379,7 +472,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedOwnerRoute: AuthenticatedOwnerRoute,
+  AuthenticatedOwnerRoute: AuthenticatedOwnerRouteWithChildren,
   AuthenticatedAccountAddressesRoute: AuthenticatedAccountAddressesRoute,
   AuthenticatedAccountFavoritesRoute: AuthenticatedAccountFavoritesRoute,
   AuthenticatedAccountNotificationsRoute:
