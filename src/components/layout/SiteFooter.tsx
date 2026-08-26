@@ -59,6 +59,15 @@ export function SiteFooter() {
                 Contact & location
               </Link>
             </li>
+            <li>
+              <Link
+                to="/owner"
+                className="inline-flex items-center gap-1.5 text-muted-foreground/70 transition-smooth hover:text-foreground"
+              >
+                <ShieldCheck aria-hidden="true" className="size-3.5" />
+                Owner Dashboard
+              </Link>
+            </li>
           </ul>
         </div>
       </div>
