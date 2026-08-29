@@ -30,12 +30,15 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { formatBDT } from "@/lib/format";
 import {
+  ownerDeleteCategory,
   ownerDeleteProduct,
   ownerGetCatalog,
+  ownerSaveCategory,
   ownerSaveProduct,
   ownerSetProductAvailability,
 } from "@/lib/owner.functions";
-import type { OwnerProduct } from "@/lib/owner.functions";
+import type { OwnerCategory, OwnerProduct } from "@/lib/owner.functions";
+
 
 export const Route = createFileRoute("/_authenticated/owner/menu")({
   component: OwnerMenu,
