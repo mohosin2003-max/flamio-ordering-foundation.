@@ -86,22 +86,65 @@ const toDraft = (product: OwnerProduct): Draft => ({
   imageUrl: product.imageUrl ?? "",
 });
 
+type CatDraft = {
+  id: string | null;
+  name: string;
+  slug: string;
+  description: string;
+  isVisible: boolean;
+  sortOrder: string;
+};
+
+const emptyCatDraft = (): CatDraft => ({
+  id: null,
+  name: "",
+  slug: "",
+  description: "",
+  isVisible: true,
+  sortOrder: "0",
+});
+
+const toCatDraft = (category: OwnerCategory): CatDraft => ({
+  id: category.id,
+  name: category.name,
+  slug: category.slug,
+  description: category.description ?? "",
+  isVisible: category.isVisible,
+  sortOrder: String(category.sortOrder),
+});
+
+const slugify = (value: string) =>
+  value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
 function OwnerMenu() {
   const getCatalog = useServerFn(ownerGetCatalog);
   const saveProduct = useServerFn(ownerSaveProduct);
   const deleteProduct = useServerFn(ownerDeleteProduct);
   const setAvailability = useServerFn(ownerSetProductAvailability);
+  const saveCategory = useServerFn(ownerSaveCategory);
+  const deleteCategory = useServerFn(ownerDeleteCategory);
   const queryClient = useQueryClient();
 
   const [draft, setDraft] = useState<Draft | null>(null);
   const [saving, setSaving] = useState(false);
+  const [catDraft, setCatDraft] = useState<CatDraft | null>(null);
+  const [catSaving, setCatSaving] = useState(false);
+  const [deleting, setDeleting] = useState<OwnerCategory | null>(null);
+  const [reassignTo, setReassignTo] = useState<string>("");
 
   const catalog = useQuery({
     queryKey: ["owner-catalog"],
     queryFn: () => getCatalog(),
   });
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ["owner-catalog"] });
+  const invalidate = async () => {
+    await queryClient.invalidateQueries({ queryKey: ["owner-catalog"] });
+    // Customer-facing menu reads the same tables.
+    await queryClient.invalidateQueries({ queryKey: ["menu"] });
+  };
 
   if (catalog.isLoading) {
     return (
@@ -126,6 +169,59 @@ function OwnerMenu() {
 
   return (
     <div className="space-y-6">
+      <Card>
+        <CardContent className="space-y-3 p-4">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="font-display text-lg font-bold">Categories</h2>
+            <Button size="sm" variant="outline" onClick={() => setCatDraft(emptyCatDraft())}>
+              <Plus className="mr-2 h-4 w-4" /> New category
+            </Button>
+          </div>
+
+          {categories.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No categories yet. Add one before creating menu items.
+            </p>
+          ) : (
+            <ul className="divide-y divide-border">
+              {categories.map((category) => (
+                <li key={category.id} className="flex items-center justify-between gap-2 py-2">
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{category.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      /{category.slug} · {category.productCount} item
+                      {category.productCount === 1 ? "" : "s"}
+                      {category.isVisible ? "" : " · hidden"}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      aria-label={`Edit ${category.name}`}
+                      onClick={() => setCatDraft(toCatDraft(category))}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      aria-label={`Delete ${category.name}`}
+                      onClick={() => {
+                        setDeleting(category);
+                        setReassignTo(categories.find((c) => c.id !== category.id)?.id ?? "");
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+
       <div className="flex justify-end">
         <Button
           size="sm"
@@ -135,6 +231,173 @@ function OwnerMenu() {
           <Plus className="mr-2 h-4 w-4" /> New item
         </Button>
       </div>
+
+      <Dialog open={catDraft !== null} onOpenChange={(open) => (open ? null : setCatDraft(null))}>
+        <DialogContent className="max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{catDraft?.id ? "Edit category" : "New category"}</DialogTitle>
+          </DialogHeader>
+
+          {catDraft ? (
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <Label>Name</Label>
+                <Input
+                  value={catDraft.name}
+                  onChange={(e) => {
+                    const name = e.target.value;
+                    setCatDraft({
+                      ...catDraft,
+                      name,
+                      slug: catDraft.id || catDraft.slug ? catDraft.slug : slugify(name),
+                    });
+                  }}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Link (slug)</Label>
+                <Input
+                  value={catDraft.slug}
+                  onChange={(e) => setCatDraft({ ...catDraft, slug: e.target.value })}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Description</Label>
+                <Textarea
+                  rows={2}
+                  value={catDraft.description}
+                  onChange={(e) => setCatDraft({ ...catDraft, description: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-2 items-end gap-3">
+                <div className="space-y-1.5">
+                  <Label>Sort order</Label>
+                  <Input
+                    inputMode="numeric"
+                    value={catDraft.sortOrder}
+                    onChange={(e) => setCatDraft({ ...catDraft, sortOrder: e.target.value })}
+                  />
+                </div>
+                <Toggle
+                  label="Visible"
+                  checked={catDraft.isVisible}
+                  onChange={(v) => setCatDraft({ ...catDraft, isVisible: v })}
+                />
+              </div>
+            </div>
+          ) : null}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCatDraft(null)}>
+              Cancel
+            </Button>
+            <Button
+              disabled={catSaving}
+              onClick={async () => {
+                if (!catDraft) return;
+                setCatSaving(true);
+                try {
+                  await saveCategory({
+                    data: {
+                      id: catDraft.id,
+                      name: catDraft.name.trim(),
+                      slug: (catDraft.slug.trim() || slugify(catDraft.name)).trim(),
+                      description: catDraft.description.trim() || null,
+                      imageUrl: null,
+                      isVisible: catDraft.isVisible,
+                      sortOrder: Number(catDraft.sortOrder) || 0,
+                    },
+                  });
+                  await invalidate();
+                  setCatDraft(null);
+                  toast.success("Category saved");
+                } catch (error) {
+                  toast.error(
+                    error instanceof Error ? error.message : "Couldn't save this category",
+                  );
+                } finally {
+                  setCatSaving(false);
+                }
+              }}
+            >
+              {catSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleting !== null} onOpenChange={(open) => (open ? null : setDeleting(null))}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete {deleting?.name}</DialogTitle>
+          </DialogHeader>
+
+          {deleting && deleting.productCount > 0 ? (
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                This category has {deleting.productCount} item
+                {deleting.productCount === 1 ? "" : "s"}. Choose where to move them — no items will
+                be deleted.
+              </p>
+              <Select value={reassignTo} onValueChange={setReassignTo}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Move items to…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories
+                    .filter((c) => c.id !== deleting.id)
+                    .map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              This category is empty and will be removed.
+            </p>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleting(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={
+                catSaving || Boolean(deleting && deleting.productCount > 0 && !reassignTo)
+              }
+              onClick={async () => {
+                if (!deleting) return;
+                setCatSaving(true);
+                try {
+                  await deleteCategory({
+                    data: {
+                      id: deleting.id,
+                      reassignTo: deleting.productCount > 0 ? reassignTo : null,
+                    },
+                  });
+                  await invalidate();
+                  setDeleting(null);
+                  toast.success("Category deleted");
+                } catch (error) {
+                  toast.error(
+                    error instanceof Error ? error.message : "Couldn't delete this category",
+                  );
+                } finally {
+                  setCatSaving(false);
+                }
+              }}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
 
       {categories.map((category) => {
         const items = products.filter((p) => p.categoryId === category.id);
