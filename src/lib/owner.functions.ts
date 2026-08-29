@@ -296,10 +296,20 @@ export const ownerSaveCategory = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-/** Deletes only when the category holds no products. */
+/**
+ * Deletes a category. Items are never deleted silently: the caller must either
+ * empty the category first or pass `reassignTo` so its items are moved.
+ */
 export const ownerDeleteCategory = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        reassignTo: z.string().uuid().nullable().optional(),
+      })
+      .parse(input),
+  )
   .handler(async ({ data, context }) => {
     const { assertOwner } = await import("@/lib/owner.server");
     await assertOwner(context.userId);
@@ -311,7 +321,29 @@ export const ownerDeleteCategory = createServerFn({ method: "POST" })
       .eq("category_id", data.id);
 
     if ((count ?? 0) > 0) {
-      throw new Error("Move or delete this category's items first.");
+      if (!data.reassignTo) {
+        throw new Error("Choose a category to move this category's items into first.");
+      }
+      if (data.reassignTo === data.id) {
+        throw new Error("Pick a different category to move the items into.");
+      }
+
+      const { data: target } = await supabaseAdmin
+        .from("categories")
+        .select("id")
+        .eq("id", data.reassignTo)
+        .maybeSingle();
+      if (!target) throw new Error("That destination category no longer exists.");
+
+      const { error: moveError } = await supabaseAdmin
+        .from("products")
+        .update({ category_id: data.reassignTo })
+        .eq("category_id", data.id);
+
+      if (moveError) {
+        console.error("Reassign products failed", moveError);
+        throw new Error("We couldn't move this category's items. Nothing was deleted.");
+      }
     }
 
     const { error } = await supabaseAdmin.from("categories").delete().eq("id", data.id);
@@ -319,8 +351,9 @@ export const ownerDeleteCategory = createServerFn({ method: "POST" })
       console.error("Delete category failed", error);
       throw new Error("We couldn't delete this category. Please try again.");
     }
-    return { ok: true };
+    return { ok: true, moved: count ?? 0 };
   });
+
 
 export const ownerSaveProduct = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
