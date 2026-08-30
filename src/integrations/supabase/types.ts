@@ -122,6 +122,93 @@ export type Database = {
         }
         Relationships: []
       }
+      inventory_items: {
+        Row: {
+          created_at: string
+          current_stock: number
+          id: string
+          is_active: boolean
+          low_stock_threshold: number
+          name: string
+          unit: string
+          unit_cost: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_stock?: number
+          id?: string
+          is_active?: boolean
+          low_stock_threshold?: number
+          name: string
+          unit?: string
+          unit_cost?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_stock?: number
+          id?: string
+          is_active?: boolean
+          low_stock_threshold?: number
+          name?: string
+          unit?: string
+          unit_cost?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      inventory_movements: {
+        Row: {
+          change_type: string
+          created_at: string
+          created_by: string | null
+          id: string
+          item_id: string
+          note: string | null
+          order_id: string | null
+          quantity: number
+          resulting_stock: number
+        }
+        Insert: {
+          change_type: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          item_id: string
+          note?: string | null
+          order_id?: string | null
+          quantity: number
+          resulting_stock: number
+        }
+        Update: {
+          change_type?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          item_id?: string
+          note?: string | null
+          order_id?: string | null
+          quantity?: number
+          resulting_stock?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_movements_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_movements_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_push_deliveries: {
         Row: {
           attempt_count: number
@@ -386,6 +473,48 @@ export type Database = {
           },
         ]
       }
+      product_ingredients: {
+        Row: {
+          created_at: string
+          id: string
+          item_id: string
+          product_id: string
+          quantity: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_id: string
+          product_id: string
+          quantity?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_id?: string
+          product_id?: string
+          quantity?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_ingredients_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_ingredients_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_variants: {
         Row: {
           created_at: string
@@ -608,7 +737,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_stock_change: {
+        Args: {
+          _change_type: string
+          _created_by?: string
+          _item_id: string
+          _note?: string
+          _quantity: number
+        }
+        Returns: number
+      }
       claim_owner: { Args: { _user_id: string }; Returns: boolean }
+      consume_inventory_for_order: {
+        Args: { _order_id: string }
+        Returns: number
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
