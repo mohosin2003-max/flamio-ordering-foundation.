@@ -27,6 +27,7 @@ import { Route as AuthenticatedAccountFavoritesRouteImport } from './routes/_aut
 import { Route as AuthenticatedAccountNotificationsRouteImport } from './routes/_authenticated/account.notifications'
 import { Route as AuthenticatedAccountOrdersRouteImport } from './routes/_authenticated/account.orders'
 import { Route as AuthenticatedOwnerIndexRouteImport } from './routes/_authenticated/owner.index'
+import { Route as AuthenticatedOwnerInventoryRouteImport } from './routes/_authenticated/owner.inventory'
 import { Route as AuthenticatedOwnerMenuRouteImport } from './routes/_authenticated/owner.menu'
 import { Route as AuthenticatedOwnerOrdersRouteImport } from './routes/_authenticated/owner.orders'
 import { Route as AuthenticatedOwnerSettingsRouteImport } from './routes/_authenticated/owner.settings'
@@ -125,6 +126,12 @@ const AuthenticatedOwnerIndexRoute = AuthenticatedOwnerIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedOwnerRoute,
 } as any)
+const AuthenticatedOwnerInventoryRoute =
+  AuthenticatedOwnerInventoryRouteImport.update({
+    id: '/inventory',
+    path: '/inventory',
+    getParentRoute: () => AuthenticatedOwnerRoute,
+  } as any)
 const AuthenticatedOwnerMenuRoute = AuthenticatedOwnerMenuRouteImport.update({
   id: '/menu',
   path: '/menu',
@@ -159,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/account/favorites': typeof AuthenticatedAccountFavoritesRoute
   '/account/notifications': typeof AuthenticatedAccountNotificationsRoute
   '/account/orders': typeof AuthenticatedAccountOrdersRoute
+  '/owner/inventory': typeof AuthenticatedOwnerInventoryRoute
   '/owner/menu': typeof AuthenticatedOwnerMenuRoute
   '/owner/orders': typeof AuthenticatedOwnerOrdersRoute
   '/owner/settings': typeof AuthenticatedOwnerSettingsRoute
@@ -180,6 +188,7 @@ export interface FileRoutesByTo {
   '/account/favorites': typeof AuthenticatedAccountFavoritesRoute
   '/account/notifications': typeof AuthenticatedAccountNotificationsRoute
   '/account/orders': typeof AuthenticatedAccountOrdersRoute
+  '/owner/inventory': typeof AuthenticatedOwnerInventoryRoute
   '/owner/menu': typeof AuthenticatedOwnerMenuRoute
   '/owner/orders': typeof AuthenticatedOwnerOrdersRoute
   '/owner/settings': typeof AuthenticatedOwnerSettingsRoute
@@ -204,6 +213,7 @@ export interface FileRoutesById {
   '/_authenticated/account/favorites': typeof AuthenticatedAccountFavoritesRoute
   '/_authenticated/account/notifications': typeof AuthenticatedAccountNotificationsRoute
   '/_authenticated/account/orders': typeof AuthenticatedAccountOrdersRoute
+  '/_authenticated/owner/inventory': typeof AuthenticatedOwnerInventoryRoute
   '/_authenticated/owner/menu': typeof AuthenticatedOwnerMenuRoute
   '/_authenticated/owner/orders': typeof AuthenticatedOwnerOrdersRoute
   '/_authenticated/owner/settings': typeof AuthenticatedOwnerSettingsRoute
@@ -228,6 +238,7 @@ export interface FileRouteTypes {
     | '/account/favorites'
     | '/account/notifications'
     | '/account/orders'
+    | '/owner/inventory'
     | '/owner/menu'
     | '/owner/orders'
     | '/owner/settings'
@@ -249,6 +260,7 @@ export interface FileRouteTypes {
     | '/account/favorites'
     | '/account/notifications'
     | '/account/orders'
+    | '/owner/inventory'
     | '/owner/menu'
     | '/owner/orders'
     | '/owner/settings'
@@ -272,6 +284,7 @@ export interface FileRouteTypes {
     | '/_authenticated/account/favorites'
     | '/_authenticated/account/notifications'
     | '/_authenticated/account/orders'
+    | '/_authenticated/owner/inventory'
     | '/_authenticated/owner/menu'
     | '/_authenticated/owner/orders'
     | '/_authenticated/owner/settings'
@@ -421,6 +434,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOwnerIndexRouteImport
       parentRoute: typeof AuthenticatedOwnerRoute
     }
+    '/_authenticated/owner/inventory': {
+      id: '/_authenticated/owner/inventory'
+      path: '/inventory'
+      fullPath: '/owner/inventory'
+      preLoaderRoute: typeof AuthenticatedOwnerInventoryRouteImport
+      parentRoute: typeof AuthenticatedOwnerRoute
+    }
     '/_authenticated/owner/menu': {
       id: '/_authenticated/owner/menu'
       path: '/menu'
@@ -446,6 +466,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedOwnerRouteChildren {
+  AuthenticatedOwnerInventoryRoute: typeof AuthenticatedOwnerInventoryRoute
   AuthenticatedOwnerMenuRoute: typeof AuthenticatedOwnerMenuRoute
   AuthenticatedOwnerOrdersRoute: typeof AuthenticatedOwnerOrdersRoute
   AuthenticatedOwnerSettingsRoute: typeof AuthenticatedOwnerSettingsRoute
@@ -453,6 +474,7 @@ interface AuthenticatedOwnerRouteChildren {
 }
 
 const AuthenticatedOwnerRouteChildren: AuthenticatedOwnerRouteChildren = {
+  AuthenticatedOwnerInventoryRoute: AuthenticatedOwnerInventoryRoute,
   AuthenticatedOwnerMenuRoute: AuthenticatedOwnerMenuRoute,
   AuthenticatedOwnerOrdersRoute: AuthenticatedOwnerOrdersRoute,
   AuthenticatedOwnerSettingsRoute: AuthenticatedOwnerSettingsRoute,
