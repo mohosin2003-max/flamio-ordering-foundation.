@@ -5,7 +5,7 @@ import { PromoBannerArea } from "@/components/home/PromoBannerArea";
 import { ProductCard } from "@/components/menu/ProductCard";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/states";
-import { menuQueryOptions, promoBannerList } from "@/lib/menu-repository";
+import { menuQueryOptions, restaurantQueryOptions } from "@/lib/menu-repository";
 
 export const Route = createFileRoute("/offers")({
   head: () => ({
@@ -27,13 +27,15 @@ export const Route = createFileRoute("/offers")({
   }),
   loader: ({ context }) => {
     context.queryClient.ensureQueryData(menuQueryOptions());
+    context.queryClient.ensureQueryData(restaurantQueryOptions());
   },
   component: OffersPage,
 });
 
 function OffersPage() {
   const { data: menu } = useSuspenseQuery(menuQueryOptions());
-  const banners = promoBannerList.filter((b) => b.isActive);
+  const { data: info } = useSuspenseQuery(restaurantQueryOptions());
+  const banners = info.banners;
   const specials = menu.products.filter((p) => p.isFeatured);
 
   return (
