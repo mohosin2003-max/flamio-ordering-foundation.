@@ -16,6 +16,7 @@ import { Route as CartRouteImport } from './routes/cart'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as OffersRouteImport } from './routes/offers'
 import { Route as AuthenticatedOwnerRouteImport } from './routes/_authenticated/owner'
 import { Route as MenuIndexRouteImport } from './routes/menu.index'
 import { Route as MenuProductSlugRouteImport } from './routes/menu.$productSlug'
@@ -64,6 +65,11 @@ const ContactRoute = ContactRouteImport.update({
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   id: '/forgot-password',
   path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OffersRoute = OffersRouteImport.update({
+  id: '/offers',
+  path: '/offers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedOwnerRoute = AuthenticatedOwnerRouteImport.update({
@@ -157,6 +163,7 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/offers': typeof OffersRoute
   '/owner': typeof AuthenticatedOwnerRouteWithChildren
   '/menu/$productSlug': typeof MenuProductSlugRoute
   '/order/$orderId': typeof OrderOrderIdRoute
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/offers': typeof OffersRoute
   '/menu/$productSlug': typeof MenuProductSlugRoute
   '/order/$orderId': typeof OrderOrderIdRoute
   '/track/$orderId': typeof TrackOrderIdRoute
@@ -204,6 +212,7 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/offers': typeof OffersRoute
   '/_authenticated/owner': typeof AuthenticatedOwnerRouteWithChildren
   '/menu/$productSlug': typeof MenuProductSlugRoute
   '/order/$orderId': typeof OrderOrderIdRoute
@@ -229,6 +238,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/forgot-password'
+    | '/offers'
     | '/owner'
     | '/menu/$productSlug'
     | '/order/$orderId'
@@ -252,6 +262,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/forgot-password'
+    | '/offers'
     | '/menu/$productSlug'
     | '/order/$orderId'
     | '/track/$orderId'
@@ -275,6 +286,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contact'
     | '/forgot-password'
+    | '/offers'
     | '/_authenticated/owner'
     | '/menu/$productSlug'
     | '/order/$orderId'
@@ -300,6 +312,7 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
+  OffersRoute: typeof OffersRoute
   MenuProductSlugRoute: typeof MenuProductSlugRoute
   OrderOrderIdRoute: typeof OrderOrderIdRoute
   TrackOrderIdRoute: typeof TrackOrderIdRoute
@@ -355,6 +368,13 @@ declare module '@tanstack/react-router' {
       path: '/forgot-password'
       fullPath: '/forgot-password'
       preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/offers': {
+      id: '/offers'
+      path: '/offers'
+      fullPath: '/offers'
+      preLoaderRoute: typeof OffersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/owner': {
@@ -514,6 +534,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
+  OffersRoute: OffersRoute,
   MenuProductSlugRoute: MenuProductSlugRoute,
   OrderOrderIdRoute: OrderOrderIdRoute,
   TrackOrderIdRoute: TrackOrderIdRoute,
