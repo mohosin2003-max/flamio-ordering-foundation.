@@ -149,7 +149,7 @@ export const ownerAdjustStock = createServerFn({ method: "POST" })
       _item_id: data.itemId,
       _change_type: data.changeType,
       _quantity: data.quantity,
-      _note: data.note ?? null,
+      _note: data.note ?? undefined,
       _created_by: context.userId,
     });
 
