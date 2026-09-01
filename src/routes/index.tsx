@@ -1,6 +1,7 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowRight, Flame } from "lucide-react";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { ArrowRight, Flame, Search } from "lucide-react";
+import { useState } from "react";
 
 import heroImage from "@/assets/hero-flamio.jpg";
 import { LocationSection } from "@/components/home/LocationSection";
@@ -35,6 +36,8 @@ export const Route = createFileRoute("/")({
 function HomePage() {
   const { data: menu } = useSuspenseQuery(menuQueryOptions());
   const { data: info } = useSuspenseQuery(restaurantQueryOptions());
+  const navigate = useNavigate();
+  const [homeQuery, setHomeQuery] = useState("");
 
   const featured = menu.products.filter((p) => p.isFeatured).slice(0, 4);
   const popular = menu.products.filter((p) => p.isPopular).slice(0, 8);
