@@ -81,7 +81,32 @@ function HomePage() {
         </div>
       </section>
 
+      <div className="mx-auto w-full max-w-6xl px-4 pt-6 sm:px-6">
+        <form
+          role="search"
+          className="relative max-w-md"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void navigate({ to: "/menu", search: homeQuery ? { q: homeQuery } : {} });
+          }}
+        >
+          <Search
+            aria-hidden="true"
+            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+          />
+          <input
+            type="search"
+            value={homeQuery}
+            onChange={(e) => setHomeQuery(e.target.value)}
+            placeholder="Search burgers, pizza, shawarma…"
+            aria-label="Search menu items"
+            className="w-full rounded-full border border-border bg-secondary py-2.5 pl-10 pr-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          />
+        </form>
+      </div>
+
       <PromoBannerArea banners={info.banners} />
+
 
       <section
         aria-labelledby="categories-heading"
