@@ -91,6 +91,7 @@ type CatDraft = {
   name: string;
   slug: string;
   description: string;
+  imageUrl: string;
   isVisible: boolean;
   sortOrder: string;
 };
@@ -100,6 +101,7 @@ const emptyCatDraft = (): CatDraft => ({
   name: "",
   slug: "",
   description: "",
+  imageUrl: "",
   isVisible: true,
   sortOrder: "0",
 });
@@ -109,6 +111,7 @@ const toCatDraft = (category: OwnerCategory): CatDraft => ({
   name: category.name,
   slug: category.slug,
   description: category.description ?? "",
+  imageUrl: category.imageUrl ?? "",
   isVisible: category.isVisible,
   sortOrder: String(category.sortOrder),
 });
@@ -269,6 +272,17 @@ function OwnerMenu() {
                   onChange={(e) => setCatDraft({ ...catDraft, description: e.target.value })}
                 />
               </div>
+              <div className="space-y-1.5">
+                <Label>Image URL (optional)</Label>
+                <Input
+                  placeholder="https://..."
+                  value={catDraft.imageUrl}
+                  onChange={(e) => setCatDraft({ ...catDraft, imageUrl: e.target.value })}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Leave empty to remove the image.
+                </p>
+              </div>
               <div className="grid grid-cols-2 items-end gap-3">
                 <div className="space-y-1.5">
                   <Label>Sort order</Label>
@@ -303,7 +317,7 @@ function OwnerMenu() {
                       name: catDraft.name.trim(),
                       slug: (catDraft.slug.trim() || slugify(catDraft.name)).trim(),
                       description: catDraft.description.trim() || null,
-                      imageUrl: null,
+                      imageUrl: catDraft.imageUrl.trim() || null,
                       isVisible: catDraft.isVisible,
                       sortOrder: Number(catDraft.sortOrder) || 0,
                     },
