@@ -17,6 +17,7 @@ import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as OffersRouteImport } from './routes/offers'
+import { Route as AuthenticatedKitchenRouteImport } from './routes/_authenticated/kitchen'
 import { Route as AuthenticatedOwnerRouteImport } from './routes/_authenticated/owner'
 import { Route as MenuIndexRouteImport } from './routes/menu.index'
 import { Route as MenuProductSlugRouteImport } from './routes/menu.$productSlug'
@@ -71,6 +72,11 @@ const OffersRoute = OffersRouteImport.update({
   id: '/offers',
   path: '/offers',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedKitchenRoute = AuthenticatedKitchenRouteImport.update({
+  id: '/kitchen',
+  path: '/kitchen',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedOwnerRoute = AuthenticatedOwnerRouteImport.update({
   id: '/owner',
@@ -164,6 +170,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/offers': typeof OffersRoute
+  '/kitchen': typeof AuthenticatedKitchenRoute
   '/owner': typeof AuthenticatedOwnerRouteWithChildren
   '/menu/$productSlug': typeof MenuProductSlugRoute
   '/order/$orderId': typeof OrderOrderIdRoute
@@ -188,6 +195,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/offers': typeof OffersRoute
+  '/kitchen': typeof AuthenticatedKitchenRoute
   '/menu/$productSlug': typeof MenuProductSlugRoute
   '/order/$orderId': typeof OrderOrderIdRoute
   '/track/$orderId': typeof TrackOrderIdRoute
@@ -213,6 +221,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/offers': typeof OffersRoute
+  '/_authenticated/kitchen': typeof AuthenticatedKitchenRoute
   '/_authenticated/owner': typeof AuthenticatedOwnerRouteWithChildren
   '/menu/$productSlug': typeof MenuProductSlugRoute
   '/order/$orderId': typeof OrderOrderIdRoute
@@ -239,6 +248,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/forgot-password'
     | '/offers'
+    | '/kitchen'
     | '/owner'
     | '/menu/$productSlug'
     | '/order/$orderId'
@@ -263,6 +273,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/forgot-password'
     | '/offers'
+    | '/kitchen'
     | '/menu/$productSlug'
     | '/order/$orderId'
     | '/track/$orderId'
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/forgot-password'
     | '/offers'
+    | '/_authenticated/kitchen'
     | '/_authenticated/owner'
     | '/menu/$productSlug'
     | '/order/$orderId'
@@ -376,6 +388,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/offers'
       preLoaderRoute: typeof OffersRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/kitchen': {
+      id: '/_authenticated/kitchen'
+      path: '/kitchen'
+      fullPath: '/kitchen'
+      preLoaderRoute: typeof AuthenticatedKitchenRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/owner': {
       id: '/_authenticated/owner'
@@ -505,6 +524,7 @@ const AuthenticatedOwnerRouteWithChildren =
   AuthenticatedOwnerRoute._addFileChildren(AuthenticatedOwnerRouteChildren)
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedKitchenRoute: typeof AuthenticatedKitchenRoute
   AuthenticatedOwnerRoute: typeof AuthenticatedOwnerRouteWithChildren
   AuthenticatedAccountAddressesRoute: typeof AuthenticatedAccountAddressesRoute
   AuthenticatedAccountFavoritesRoute: typeof AuthenticatedAccountFavoritesRoute
@@ -514,6 +534,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedKitchenRoute: AuthenticatedKitchenRoute,
   AuthenticatedOwnerRoute: AuthenticatedOwnerRouteWithChildren,
   AuthenticatedAccountAddressesRoute: AuthenticatedAccountAddressesRoute,
   AuthenticatedAccountFavoritesRoute: AuthenticatedAccountFavoritesRoute,
