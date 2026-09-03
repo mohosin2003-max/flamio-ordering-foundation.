@@ -1,0 +1,281 @@
+FLAMIO — SAFE FINAL GAP FIX
+CONTINUE EXISTING PROJECT — DO NOT REBUILD
+
+You are continuing the CURRENT Flamio Smart Restaurant OS codebase.
+
+The latest implementation already contains most of the requested Customer Home, Smart Search, and KDS functionality.
+
+Your job is ONLY to finish the remaining incomplete parts.
+
+==================================================
+CRITICAL SAFETY RULE
+==================================================
+
+FIRST inspect the existing repository.
+
+DO NOT rebuild, replace, refactor, migrate, redesign, or duplicate existing functionality.
+
+DO NOT modify or recreate:
+- database/schema/tables
+- RLS
+- authentication
+- users/roles/permissions
+- customer ordering
+- cart
+- checkout
+- payment
+- delivery
+- order creation
+- customer tracking
+- owner order management
+- existing order/status system
+- existing polling/synchronization
+- existing menu repository
+- existing KDS server functions
+- existing bottom navigation
+
+DO NOT create duplicate:
+- order systems
+- status systems
+- authentication
+- polling
+- notification systems
+- menu repositories
+- search services
+- hooks
+- server functions
+- routes
+- components
+
+If something already exists, REUSE IT.
+
+If an existing implementation can be connected safely, CONNECT IT.
+
+Do not recreate it.
+
+==================================================
+CURRENT IMPLEMENTATION — PRESERVE
+==================================================
+
+These files/features already exist and must be preserved:
+
+- src/components/search/SearchOverlay.tsx
+- src/components/home/HomeCarousel.tsx
+- src/routes/index.tsx
+- src/routes/_authenticated/kitchen.tsx
+- src/lib/kitchen.server.ts
+- src/lib/kitchen.functions.ts
+
+Existing KDS functions:
+- assertKitchen()
+- getKitchenAccess()
+- kitchenListOrders()
+- kitchenUpdateOrderStatus()
+
+Existing KDS workflow:
+New → Preparing → Ready → Completed
+
+Existing KDS polling:
+20-second polling pattern reused from Owner Orders.
+
+Existing new-order alert:
+WebAudio beep + visual new-order indication.
+
+DO NOT rebuild any of these.
+
+==================================================
+ONLY REMAINING CUSTOMER WORK
+==================================================
+
+1. Inspect:
+
+src/components/layout/SiteHeader.tsx
+
+2. Complete ONLY the Home header integration.
+
+Required Home header:
+
+Flamio logo
+→ selected location
+→ Search icon
+→ Notification
+→ three-dot menu
+
+Do not add Account/Profile to the top header.
+
+Do not add a phone/call icon.
+
+Reuse existing header components and functionality wherever possible.
+
+3. Connect the existing SearchOverlay to the existing Home Search icon.
+
+When the Search icon is clicked/tapped:
+
+→ open the existing SearchOverlay.
+
+DO NOT create another search component.
+
+DO NOT create another search service.
+
+DO NOT create another search route unless an existing route is genuinely required and no existing one can be reused.
+
+The existing SearchOverlay is the source of truth.
+
+4. Preserve the existing Home implementation:
+
+Banner
+→ Categories
+→ Popular/Full Menu
+→ Offers
+
+Do not redesign it.
+
+Do not change the existing bottom navigation:
+
+Home | Contact | Offers | My Orders | Account
+
+==================================================
+ONLY REMAINING KDS WORK
+==================================================
+
+The KDS route is already implemented.
+
+DO NOT rebuild it.
+
+Only inspect for obvious compile/runtime issues.
+
+Preserve:
+
+/kitchen
+
+Existing:
+- kitchenListOrders()
+- kitchenUpdateOrderStatus()
+- getKitchenAccess()
+- assertKitchen()
+- statusLabel
+- existing orders.status
+- existing 20-second polling
+- existing WebAudio alert
+
+Do not create another polling system.
+
+Do not create another order/status system.
+
+Do not modify customer or owner order logic.
+
+==================================================
+VERIFICATION
+==================================================
+
+After the minimal changes:
+
+Run:
+- typecheck
+- build
+
+Fix ONLY errors caused by these changes.
+
+If browser testing is available, verify:
+
+1. Home loads.
+2. Search icon opens SearchOverlay.
+3. Search auto-focus works.
+4. "bur" returns relevant existing Burger items.
+5. "burger" returns relevant existing Burger items.
+6. "chicken" returns relevant existing Chicken items.
+7. Search result opens the existing product route.
+8. Bottom navigation is unchanged.
+9. /kitchen loads for authorized access.
+10. Normal customers cannot access /kitchen.
+11. KDS workflow:
+    New → Preparing → Ready → Completed
+12. Owner sees the updated status.
+13. Customer Tracking/My Orders sees the updated status.
+14. No horizontal overflow.
+
+If browser/live testing is unavailable:
+
+DO NOT claim those tests passed.
+
+Report:
+
+NOT VERIFIED — requires live/manual testing.
+
+==================================================
+ABSOLUTE STOP RULE
+==================================================
+
+If completing this task requires:
+
+- database changes
+- schema changes
+- new tables
+- RLS changes
+- authentication changes
+- role/permission changes
+- new backend infrastructure
+- external services
+- major refactoring
+
+STOP.
+
+Do NOT improvise.
+
+Do NOT modify those systems.
+
+Report the item as BLOCKED.
+
+==================================================
+GIT SAFETY
+==================================================
+
+Before editing:
+
+- Inspect the current Git state.
+- Do not discard existing changes.
+- Do not reset/revert existing work.
+- Do not overwrite unrelated changes.
+- Modify only the files required for this gap-fix.
+
+Prefer the smallest possible diff.
+
+Do not touch unrelated files.
+
+==================================================
+FINAL REPORT
+==================================================
+
+Return only:
+
+IMPLEMENTED
+- Exact changes made.
+
+REUSED
+- Existing components/functions/hooks/routes/data reused.
+
+UNCHANGED
+- Existing systems intentionally preserved.
+
+BLOCKED
+- Anything not completed and why.
+
+VERIFICATION
+- Typecheck result.
+- Build result.
+- Browser/manual tests actually performed.
+- Tests that could not be performed.
+
+IMPORTANT:
+
+Never claim a test passed unless it was actually performed.
+
+This is a FINAL GAP-FIX.
+
+NO REBUILD.
+NO REFACTOR.
+NO DUPLICATION.
+NO DATABASE CHANGES.
+NO AUTH CHANGES.
+NO ORDER SYSTEM CHANGES.
+NO KDS REBUILD.
