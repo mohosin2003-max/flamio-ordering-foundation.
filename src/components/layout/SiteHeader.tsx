@@ -1,8 +1,9 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { MapPin, MoreVertical, Search } from "lucide-react";
+import { MoreVertical, Search } from "lucide-react";
 import { useState } from "react";
 
+import { LocationSelector, useCustomerLocation } from "@/components/layout/LocationSelector";
 import { NotificationBell } from "@/components/layout/NotificationBell";
 import { SearchOverlay } from "@/components/search/SearchOverlay";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useCart } from "@/context/cart";
-import { restaurant } from "@/data/restaurant";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -31,6 +31,7 @@ export function SiteHeader() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchOpen, setSearchOpen] = useState(false);
+  const { location, setLocation } = useCustomerLocation();
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
@@ -50,12 +51,7 @@ export function SiteHeader() {
           <span className="font-display text-xl font-extrabold tracking-tight">Flamio</span>
         </Link>
 
-        <span className="flex min-w-0 flex-1 items-center gap-1 text-muted-foreground">
-          <MapPin aria-hidden="true" className="size-4 shrink-0 text-primary" />
-          <span className="truncate text-xs font-medium sm:text-sm">
-            {restaurant.addressLine ?? restaurant.city}
-          </span>
-        </span>
+        <LocationSelector location={location} onSelect={setLocation} />
 
         <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
           {navItems.map((item) => (
