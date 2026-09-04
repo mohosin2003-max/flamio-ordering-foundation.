@@ -124,8 +124,8 @@ export function SiteHeader() {
           </DropdownMenu>
         </div>
       </div>
-
-      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
     </header>
+    <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
+    </>
   );
 }
